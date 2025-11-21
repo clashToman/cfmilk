@@ -12,7 +12,7 @@ ADMIN_PHONE = os.getenv("ADMIN_PHONE")
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 
-USERNAME = os.getenv("USERNAME") 
+USERNAME = os.getenv("USERNAME")
 HOST = os.getenv("HOST")
 DB_NAME = os.getenv("DB_NAME")
 PASSWORD = os.getenv("PASSWORD")
@@ -31,11 +31,12 @@ try:
     with engine.connect() as connection:
         print("Database Connected Successfully..!")
 except Exception as e:
-    print("Databadw Unable to connected",e)
+    print("Databadw Unable to connected", e)
+
 
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
-        db.close() 
+        db.close()

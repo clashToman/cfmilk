@@ -22,7 +22,7 @@ from Backend.Routes.auth import get_current_user
 from datetime import datetime
 
 
-admin_router = APIRouter(prefix='/admin',tags=["Admin"])
+admin_router = APIRouter(prefix="/admin", tags=["Admin"])
 
 
 upload_directory = "uploads_img"
@@ -30,6 +30,8 @@ os.makedirs(upload_directory, exist_ok=True)
 
 
 admin_router.mount("/uploads", StaticFiles(directory="uploads_img"), name="uploads")
+
+
 def get_db():
     db = SessionLocal()
     try:
@@ -48,7 +50,7 @@ async def upload_img(
 
     file_path = None
     if image:
-        file_path =  os.path.join(upload_directory, image.filename) #type: ignore
+        file_path = os.path.join(upload_directory, image.filename)  # type: ignore
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
 
@@ -212,16 +214,13 @@ async def add_product(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-  
     admin_role = current_user.role_rel.name if current_user.role_rel else ""
     if admin_role != "admin":
         raise HTTPException(status_code=403, detail="Only admin can add a new product!")
 
-
     category = db.query(Category).filter(Category.name == request.category_name).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
-
 
     existing_product = (
         db.query(Product).filter(Product.name == request.product_name).first()
@@ -261,6 +260,7 @@ async def add_product(
         "status": request.status,
     }
 
+
 @admin_router.put("/update_product_stock")
 async def update_product_stock(
     request: UpdateProductStockRequest,
@@ -269,14 +269,16 @@ async def update_product_stock(
 ):
     admin_role = current_user.role_rel.name if current_user.role_rel else ""
     if admin_role != "admin":
-        raise HTTPException(status_code=403, detail="Only admin can update product stock")
+        raise HTTPException(
+            status_code=403, detail="Only admin can update product stock"
+        )
 
     product = db.query(Product).filter(Product.name == request.product_name).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    product.stock = request.new_stock #type: ignore
-    product.updated_at = datetime.utcnow() #type: ignore
+    product.stock = request.new_stock  # type: ignore
+    product.updated_at = datetime.utcnow()  # type: ignore
 
     db.commit()
     db.refresh(product)

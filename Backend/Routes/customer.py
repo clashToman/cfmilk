@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
-from Backend.schemas.schemas import CustomerUpdate, CustomerResponse,CustomerOrders
-from Backend.Models.model import User as UserModel, Customer, Product,Order
+from Backend.schemas.schemas import CustomerUpdate, CustomerResponse, CustomerOrders
+from Backend.Models.model import User as UserModel, Customer, Product, Order
 from Backend.config import SessionLocal
 from Backend.Routes.auth import get_current_user
 
 
 customer_router = APIRouter(prefix="/customer", tags=["Customer"])
+
 
 def get_db():
     db = SessionLocal()
@@ -22,7 +23,9 @@ async def get_customer_profile(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    customer = db.query(Customer).filter(Customer.user_id == current_user.user_id).first()
+    customer = (
+        db.query(Customer).filter(Customer.user_id == current_user.user_id).first()
+    )
 
     if not customer:
         raise HTTPException(status_code=404, detail="Customer profile not found")
@@ -37,7 +40,9 @@ def update_customer_profile(
     current_user: UserModel = Depends(get_current_user),
 ):
     user = db.query(UserModel).filter(UserModel.user_id == current_user.user_id).first()
-    customer = db.query(Customer).filter(Customer.user_id == current_user.user_id).first()
+    customer = (
+        db.query(Customer).filter(Customer.user_id == current_user.user_id).first()
+    )
 
     if not user or not customer:
         raise HTTPException(status_code=404, detail="User or Customer not found")
@@ -49,25 +54,23 @@ def update_customer_profile(
         user.user_name = update_data["user_name"]
         customer.user_name = update_data["user_name"]
 
-    
     # Update Customer
     if "phone" in update_data:
         customer.phone = update_data["phone"]
     if "address" in update_data:
         customer.address = update_data["address"]
 
-    user.updated_at = datetime.utcnow() #type: ignore
-    customer.updated_at = datetime.utcnow() #type: ignore   
+    user.updated_at = datetime.utcnow()  # type: ignore
+    customer.updated_at = datetime.utcnow()  # type: ignore
 
     db.commit()
     db.refresh(user)
     db.refresh(customer)
 
-    
     return CustomerResponse(
-        user_name=user.user_name, #type:ignore
-        phone=customer.phone, #type:ignore
-        address=customer.address #type:ignore
+        user_name=user.user_name,  # type:ignore
+        phone=customer.phone,  # type:ignore
+        address=customer.address,  # type:ignore
     )
 
 
@@ -92,7 +95,7 @@ async def place_order(
         raise HTTPException(status_code=404, detail="Product not found")
 
     # Check stock availability
-    if product.stock < order.quantity: #type: ignore
+    if product.stock < order.quantity:  # type: ignore
         raise HTTPException(status_code=400, detail="Insufficient stock available")
 
     # Calculate total amount
@@ -128,19 +131,11 @@ async def place_order(
     }
 
 
-
 @customer_router.get("/orders")
 async def get_customer_orders(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user),
 ):
-    orders = (
-        db.query(Order)
-        .filter(Order.customer_id == current_user.user_id)
-        .all()
-    )
+    orders = db.query(Order).filter(Order.customer_id == current_user.user_id).all()
 
     return {"orders": orders}
-
-
-

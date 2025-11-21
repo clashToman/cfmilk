@@ -183,6 +183,7 @@ class Payment(Base):
     paid_by_user = relationship("User", back_populates="payments")
 
 
+
 # ---------- INVENTORY LOGS ----------
 class InventoryLog(Base):
     __tablename__ = "inventory_logs"

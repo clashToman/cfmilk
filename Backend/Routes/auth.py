@@ -33,12 +33,12 @@ def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(hours=24)
     to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM) #type: ignore
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)  # type: ignore
 
 
 def decode_token(token: str):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM]) #type: ignore
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])  # type: ignore
         return payload
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
@@ -124,14 +124,14 @@ async def send_otp(request: PhoneRequest, db: Session = Depends(get_db)):
             {"user_id": user.user_id, "role_id": user.role_id}
         )
         db.commit()
-        
+
         return {
             "verified": True,
             "user_name": user.user_name,
             "user_id": user.user_id,
             "role_id": user.role_id,
             "access_token": access_token,
-            "token_type": "bearer", 
+            "token_type": "bearer",
         }
 
     print(f"[{role.name.upper()} OTP] Phone: {phone}, OTP: {otp}")
